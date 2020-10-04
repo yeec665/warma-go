@@ -27,6 +27,7 @@ var ctl = new Object();
 ctl.keys = "asdfopqwer";
 ctl.pressed = {"a":false,"s":false,"d":false,"f":false,"o":false,"p":false,"q":false,"w":false,"e":false,"r":false};
 ctl.released = true;
+ctl.mapping = {"q":null,"w":null,"e":null,"r":null};
 ctl.seq = "";
 ctl.seqNode = null;
 ctl.t0 = 0;
@@ -37,6 +38,7 @@ chr.dir = false;
 chr.px = 200;
 chr.speed = 0;
 chr.speedLevels = [0, 12, 18, 23, 27];
+chr.t0 = 0;
 chr.idle = "dong";
 chr.action = chr.idle;
 chr.actionNode = null;
@@ -46,6 +48,10 @@ chr.san = new Object();
 chr.san.value = 100;
 chr.san.borderNode = null;
 chr.san.percentNode = null;
+var au = new Object();
+au.purePlayer = null;
+au.voicePlayer = null;
+au.extinguisherPlayer = null;
 function collectNodes() {
     env.contentNode = document.getElementById("content");
     env.groundNode = document.getElementById("ground");
@@ -55,6 +61,9 @@ function collectNodes() {
     chr.node = document.getElementById("character");
     chr.san.borderNode = document.getElementById("san-border");
     chr.san.percentNode = document.getElementById("san-percent");
+    au.purePlayer = document.getElementById("au-pure");
+    au.voicePlayer = document.getElementById("au-voice");
+    au.extinguisherPlayer = document.getElementById("au-extinguisher");
     var widthStyle = "width: " + env.mapWidth + "px;";
     env.groundNode.style = widthStyle;
     env.overlayNode.style = widthStyle;
@@ -111,6 +120,7 @@ function setDir(d) {
 }
 function setAction(a) {
     if (chr.action != a) {
+        chr.t0 = ctl.t1;
         chr.action = a;
         chr.actionNode.innerHTML = a;
         chr.change = true;
@@ -138,7 +148,11 @@ function seqChange() {
     var seq = ctl.seq;
     ctl.seqNode.innerHTML = seq;
     if (seq.endsWith("sSsSsSsS")) {
-        chr.idle = "dong";
+        if (chr.px < env.leftBound + 200) {
+            chr.idle = "dong";
+        } else {
+            chr.idle = "jan";
+        }
     }
     if (seq.endsWith("dDdDdDdD")) {
         if (chr.px > env.mapWidth - env.rightBound - 200) {
@@ -147,6 +161,16 @@ function seqChange() {
             chr.idle = "o";
         }
     }
+    if (seq.endsWith("aPpPpS") || seq.endsWith("fPpPpD")) {
+        chr.speed = 0;
+        setAction("sunsun");
+        return;
+    }
+    if (seq.endsWith("aPpS") || seq.endsWith("fPpD")) {
+        chr.speed = 0;
+        setAction("eiheiheihei");
+        return;
+    }
     if (seq.endsWith("aAaS") || seq.endsWith("fFfD")) {
         chr.speed = 0;
         setAction("ho");
@@ -154,7 +178,11 @@ function seqChange() {
     }
     if (seq.endsWith("DSs") || seq.endsWith("SDd")) {
         chr.speed = 0;
-        setAction("da");
+        if (Math.random() < 0.5) {
+            setAction("gyu");
+        } else {
+            setAction("gyui");
+        }
         return;
     }
     if (seq.endsWith("DSd") || seq.endsWith("SDs")) {
@@ -209,38 +237,41 @@ function seqChange() {
         sendHeart();
         return;
     }
-    if (seq.endsWith("OoOoO")) {
+    if ((seq.endsWith("OoOoOoS") || seq.endsWith("OoOoOoD")) && chr.san.value < 50) {
+        setDir(seq.endsWith("S"));
+        chr.speed = chr.speedLevels[1];
+        setAction("noronoro");
+        return;
+    }
+    if (seq.endsWith("OoOoA") || seq.endsWith("OoOoF")) {
+        chr.speed = 0;
+        setAction("dokodoko");
+        return;
+    }
+    if (seq.endsWith("OoOoS") || seq.endsWith("OoOoD")) {
         chr.speed = 0;
         setAction("niconico");
         return;
     }
-    if (seq.endsWith("A")) {
-        setDir(true);
+    if (seq.endsWith("A") || seq.endsWith("F")) {
+        setDir(seq.endsWith("A"));
         chr.speed = chr.speedLevels[3];
         setAction("sasa");
         return;
     }
-    if (seq.endsWith("F")) {
-        setDir(false);
-        chr.speed = chr.speedLevels[3];
-        setAction("sasa");
-        return;
-    }
-    if (seq.endsWith("S")) {
-        setDir(true);
-        chr.speed = chr.speedLevels[1];
-        setAction("dadadada");
-        return;
-    }
-    if (seq.endsWith("D")) {
-        setDir(false);
+    if (seq.endsWith("S") || seq.endsWith("D")) {
+        setDir(seq.endsWith("S"));
         chr.speed = chr.speedLevels[1];
         setAction("dadadada");
         return;
     }
     if (seq.endsWith("P")) {
         chr.speed = 0;
-        setAction("xiu");
+        if (Math.random() < 0.5) {
+            setAction("xiu");
+        } else {
+            setAction("da");
+        }
         return;
     }
     if (seq.endsWith("O")) {
@@ -248,10 +279,27 @@ function seqChange() {
         setAction("music");
         return;
     }
+    for (var k in ctl.mapping) {
+        if (seq.endsWith("OoOoPp" + k.toUpperCase())) {
+            var before = seq.substring(0, seq.length - 7);
+            if (before.length > 0) {
+                ctl.seq = before;
+                seqChange();
+                ctl.mapping[k] = chr.action;
+                return;
+            }
+        }
+        if (ctl.mapping[k] != null && seq.endsWith(k.toUpperCase())) {
+            chr.speed = 0;
+            setAction(ctl.mapping[k]);
+            return;
+        }
+    }
     chr.speed = 0;
     setAction(chr.idle);
 }
 function keyDown(c) {
+    c = c.toLowerCase();
     var kv = document.getElementById("kv-" + c);
     if (kv != null) {
         kv.className = "button-view pressed";
@@ -269,6 +317,7 @@ function keyDown(c) {
     }
 }
 function keyUp(c) {
+    c = c.toLowerCase();
     var kv = document.getElementById("kv-" + c);
     if (kv != null) {
         kv.className = "button-view";
@@ -432,17 +481,50 @@ function tickEntities() {
         }
     }
 }
+function tickMusic() {
+    if (ctl.t1 - chr.t0 >= 8) {
+        if (chr.action == "dokodoko") {
+            if (!au.purePlayer.paused) {
+                au.purePlayer.pause();
+                au.voicePlayer.currentTime = au.purePlayer.currentTime;
+                au.voicePlayer.play();
+            } else if (!au.extinguisherPlayer.paused) {
+                au.extinguisherPlayer.pause();
+                au.voicePlayer.play();
+            }
+        } else if (chr.action == "music") {
+            if (!au.purePlayer.paused) {
+                au.purePlayer.pause();
+                au.extinguisherPlayer.play();
+            } else if (!au.voicePlayer.paused) {
+                au.voicePlayer.pause();
+                au.extinguisherPlayer.play();
+            }
+        } else {
+            if (!au.voicePlayer.paused) {
+                au.voicePlayer.pause();
+                au.purePlayer.currentTime = au.voicePlayer.currentTime;
+                au.purePlayer.play();
+            } else if (!au.extinguisherPlayer.paused) {
+                au.extinguisherPlayer.pause();
+                au.purePlayer.play();
+            }
+        }
+    }
+}
 function tick() {
     ctl.t1++;
     tickSan();
     tickTransfrom();
     tickCake();
     tickEntities();
+    tickMusic();
 }
 function startGame() {
     prepareNodes();
     prepareActions();
     window.setInterval(tick, 50);
+    au.purePlayer.play();
 }
 document.onreadystatechange = function(e) {
     if (e.target.readyState == "complete") {

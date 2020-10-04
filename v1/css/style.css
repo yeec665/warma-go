@@ -118,7 +118,7 @@ body>div {
     font-size: 16px;
     color: #FFF;
 }
-/**/
+/**
 #debug {
     display: none;
 }
@@ -191,4 +191,7 @@ body>div {
 }
 #cover-inner.destroyed {
     opacity: 0;
+}
+audio {
+    display: none;
 }
