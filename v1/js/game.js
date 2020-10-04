@@ -1,5 +1,5 @@
 var env = new Object();
-env.mapWidth = 6360;
+env.mapWidth = 3300;
 env.leftBound = 160;
 env.rightBound = 450;
 env.grayScale = false;
@@ -11,15 +11,7 @@ env.positive = [
     "<div>我是沃玛，做点傻开心的视频。</div>",
     "<div>LOFTER上面有一个记梦的主页</div>",
     "<div>最开始成为天使的时候</div>",
-    "<div>长沙口音的精髓，在于尾音上扬↗</div>",
-    "<div>我都已经花钱买游戏了，为什么还要花时间玩呢</div>",
-    "<div>是Photoshop，不是PS，PS不专业啊，一定要说：Photoshop</div>",
-    "<div>养鸡场开业了，母鸡又圆又好吃！</div>",
-    "<div>沃玛超级可爱，耶！</div>",
-    "<div>在为期末考试复习的时候，只要是跟学习没有关系的事情都会变得有趣的</div>",
-    "<div>麻花辫这样的发型有一种非比寻常的魔力</div>",
-    "<div>失踪的人居然是米津玄师</div>",
-    "<div>越写代码头发越多的儿子</div>"
+    "<div>长沙口音的精髓，在于尾音上扬↗</div>"
 ];
 env.cover = new Object();
 env.cover.outerNode = null;
@@ -44,7 +36,7 @@ chr.change = true;
 chr.dir = false;
 chr.px = 200;
 chr.speed = 0;
-chr.speedLevels = [0, 9, 15, 18, 23];
+chr.speedLevels = [0, 12, 18, 23, 27];
 chr.idle = "dong";
 chr.action = chr.idle;
 chr.actionNode = null;
@@ -79,7 +71,7 @@ function createBillboards() {
             var bbNode = document.createElement("div");
             bbNode.className = "billboard";
             bbNode.innerHTML = env.positive[i];
-            bbNode.style = "left: " + (320 + 400 * i) + "px;";
+            bbNode.style = "left: " + (310 + 400 * i) + "px;";
             env.groundNode.appendChild(bbNode);
             obj.node = bbNode;
         } else {
@@ -126,14 +118,14 @@ function setAction(a) {
 }
 function sendHeart() {
     var obj = new Object();
-    obj.ttl = 180;
+    obj.ttl = 80;
     obj.px = chr.px;
     if (chr.dir) {
-        obj.px -= 160;
-        obj.vx = -17;
+        obj.px -= 100;
+        obj.vx = -20;
     } else {
-        obj.px += 160;
-        obj.vx = 17;
+        obj.px += 100;
+        obj.vx = 20;
     }
     var eNode = document.createElement("div");
     eNode.className = "entity";
@@ -267,7 +259,7 @@ function keyDown(c) {
     if (ctl.pressed[c] != null && !ctl.pressed[c]) {
         if (ctl.released) {
             ctl.released = false;
-            if (ctl.t1 - ctl.t0 > 10) {
+            if (ctl.t1 - ctl.t0 > 5) {
                 ctl.seq = "";
             }
         }
@@ -301,14 +293,24 @@ function prepareActions() {
     document.body.onkeyup = function(e) {
         keyUp(e.key);
     }
-    var btn = null;
     for (var i = 0; i < ctl.keys.length; i++) {
         let c = ctl.keys.charAt(i);
-        btn = document.getElementById("k-" + c);
+        let btn = document.getElementById("k-" + c);
         if (btn != null) {
-            btn.onmousedown = function() {keyDown(c);};
-            btn.onmouseup = function() {keyUp(c);};
+            btn.onmousedown = function() {
+                keyDown(c);
+            };
+            btn.onmouseup = function() {
+                keyUp(c);
+            };
             btn.onmouseleave = btn.onmouseup;
+            btn.ontouchstart = function() {
+                keyDown(c);
+                btn.onmousedown = null;
+                btn.onmouseup = null;
+                btn.onmouseleave = null;
+            };
+            btn.ontouchend = btn.onmouseup;
         }
     }
 }
@@ -440,7 +442,7 @@ function tick() {
 function startGame() {
     prepareNodes();
     prepareActions();
-    window.setInterval(tick, 30);
+    window.setInterval(tick, 50);
 }
 document.onreadystatechange = function(e) {
     if (e.target.readyState == "complete") {

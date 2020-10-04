@@ -43,10 +43,11 @@ body>div {
     position: absolute;
 }
 .billboard {
-    width: 170px;
+    width: 166px;
     height: 116px;
     top: 145px;
-    padding: 5px;
+    padding: 3px;
+    border: 4px solid #444;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -60,8 +61,8 @@ body>div {
 .entity {
     width: 64px;
     height: 64px;
-    left: -32px;
-    top: 400px;
+    left: -16px;
+    top: 464px;
     background-image: url("../img/heart.png");
     background-position: center;
     background-repeat: no-repeat;
@@ -117,9 +118,11 @@ body>div {
     font-size: 16px;
     color: #FFF;
 }
+/**/
 #debug {
     display: none;
 }
+/**/
 #debug>span {
     margin: 8px;
 }
