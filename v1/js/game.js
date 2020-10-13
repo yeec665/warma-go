@@ -1,18 +1,65 @@
 var env = new Object();
-env.mapWidth = 3300;
+env.mapWidth = 3600;
 env.leftBound = 160;
 env.rightBound = 450;
 env.grayScale = false;
 env.entities = [];
 env.billboards = [];
-env.positive = [
+env.content = new Object();
+env.content.positive = [
     "<div>WARMA GO!</div>",
     "<div>沃玛来了哦！</div>",
     "<div>我是沃玛，做点傻开心的视频。</div>",
+    "<img src='img/cp-1.png'></img>",
     "<div>LOFTER上面有一个记梦的主页</div>",
     "<div>最开始成为天使的时候</div>",
-    "<div>长沙口音的精髓，在于尾音上扬↗</div>"
+    "<div>长沙口音的精髓，在于尾音上扬↗</div>",
+    "<img src='img/cp-2.png'></img>",
+    "<div>我都已经花钱买游戏了，为什么还要花时间玩呢</div>",
+    "<div>整个长沙就是我的鞋</div>",
+    "<div>是Photoshop，不是PS，PS不专业啊，一定要说：Photoshop</div>",
+    "<img src='img/cp-3.png'></img>",
+    "<div>养鸡场开业了，母鸡又圆又好吃！</div>",
+    "<div>沃玛超级可爱，耶！</div>",
+    "<div>期末复习的时候，只要是跟学习没有关系的事情都会变得有趣的</div>",
+    "<img src='img/cp-4.png'></img>",
+    "<div>麻花辫这样的发型有一种非比寻常的魔力</div>",
+    "<div>失踪的人居然是米津玄师</div>",
+    "<div>越写代码头发越多的儿子</div>",
+    "<img src='img/cp-5.png'></img>",
+    "<div>沃尔玛就是我的家族企业</div>",
+    "<div>沃尔玛那个超市吗？那个只是我家不值一提的家族企业</div>",
+    "<div>喝了咖啡之后，整个地球都是我的了！</div>"
 ];
+env.content.positivePointer = 0;
+env.content.nextPositive = function() {
+    return this.positive[this.positivePointer++ % this.positive.length];
+};
+env.content.negative = [
+    "<div>次时代高级写实儿童画</div>",
+    "<div>学了三年竖笛吹出来的</div>",
+    "<div>我为小朋友们制作了几个高兴的东西</div>",
+    "<img src='img/cn-1.png'></img>",
+    "<div>很久没和人类说话了</div>",
+    "<div>人类的能力是有极限的</div>",
+    "<div>……就会看到不存在的东西</div>",
+    "<img src='img/cn-2.png'></img>",
+    "<div>把人写死就行了</div>",
+    "<div>实验楼</div>",
+    "<div>绿拖把</div>",
+    "<img src='img/cn-3.png'></img>",
+];
+env.content.negativePointer = 0;
+env.content.nextNegative = function() {
+    return this.negative[this.negativePointer++ % this.negative.length];
+};
+env.content.nextEntry = function() {
+    if (chr.san.value > 30) {
+        return this.nextPositive();
+    } else {
+        return this.nextNegative();
+    }
+}
 env.cover = new Object();
 env.cover.outerNode = null;
 env.cover.innerNode = null;
@@ -20,6 +67,17 @@ env.cover.inSide = false;
 env.cover.rnd1 = 0;
 env.cover.rnd2 = 0;
 env.cover.hp = 7;
+env.chicken = new Object();
+env.chicken.px = 600;
+env.chicken.ttl = 0;
+env.chicken.node = null;
+env.cat = new Object();
+env.cat.px = 1000;
+env.cat.node = null;
+env.snowman = new Object();
+env.snowman.px = 1800 + 800 * Math.random();
+env.snowman.lr = 0;
+env.snowman.node = null;
 env.contentNode = null;
 env.groundNode = null;
 env.overlayNode = null;
@@ -71,32 +129,46 @@ function collectNodes() {
     chr.actionNode.innerHTML = chr.action;
 }
 function createBillboards() {
-    var i = 0;
-    var left = 310;
-    while (left < env.mapWidth) {
-        var obj = new Object();
-        obj.positive = true;
-        if (i < env.positive.length && env.positive[i] != null) {
-            var bbNode = document.createElement("div");
-            bbNode.className = "billboard";
-            bbNode.innerHTML = env.positive[i];
-            bbNode.style = "left: " + (310 + 400 * i) + "px;";
-            env.groundNode.appendChild(bbNode);
-            obj.node = bbNode;
-        } else {
-            obj.node = null;
-        }
-        env.billboards.push(obj);
-        i++;
-        left += 400;
+    var count = 6;
+    for (var index = 0; index < count; index++) {
+        var board = new Object();
+        board.px = 400 + 400 * index;
+        board.pending = false;
+        var node = document.createElement("div");
+        node.className = "billboard";
+        node.innerHTML = env.content.nextPositive();
+        node.style = "left: " + (board.px - 90) + "px;";
+        env.groundNode.appendChild(node);
+        board.node = node;
+        env.billboards.push(board);
     }
 }
 function createCake() {
     var node = null;
+    // chicken
+    node = document.createElement("div");
+    node.className = "c-chicken";
+    node.style = "transform: translateX(" + env.chicken.px + "px);";
+    env.chicken.node = node;
+    env.groundNode.appendChild(node);
+    // cat
+    node = document.createElement("div");
+    node.className = "c-cat";
+    node.style = "transform: translateX(" + env.cat.px + "px);";
+    env.cat.node = node;
+    env.groundNode.appendChild(node);
+    // snowman
+    node = document.createElement("div");
+    node.className = "c-snowman";
+    node.style = "transform: translateX(" + env.snowman.px + "px); opacity: 0.0;";
+    env.snowman.node = node;
+    env.groundNode.appendChild(node);
+    // cake
     node = document.createElement("div");
     node.id = "cake";
     node.style = "transform: translateX(" + (env.mapWidth - env.rightBound) + "px);";
     env.groundNode.appendChild(node);
+    // cover
     node = document.createElement("div");
     node.id = "cover-inner";
     env.cover.innerNode = node;
@@ -372,12 +444,17 @@ function breakCover() {
         env.cover.hp = newHp;
     }
 }
-function tickSan() {
-    if (chr.action == "music" && ctl.t1 % 4 == 0) {
-        var newSan = Math.max(10, chr.san.value - 1);
+function sanDecrease(amount) {
+    if (amount > 0) {
+        var newSan = Math.max(10, chr.san.value - amount);
         if (newSan != chr.san.value) {
             if (chr.san.value > 30 && !(newSan > 30)) {
+                env.cat.node.className = "c-cat visible";
+                env.snowman.node.className = "c-snowman visible";
                 chr.san.borderNode.className = "danger";
+                env.billboards.forEach(board => {
+                    board.pending = true;
+                });
             }
             if (chr.san.value > 20 && !(newSan > 20)) {
                 env.contentNode.className = "gray";
@@ -387,7 +464,35 @@ function tickSan() {
         }
     }
 }
+function sanIncrease(amount) {
+    if (amount > 0) {
+        var newSan = Math.min(100, chr.san.value + amount);
+        if (newSan != chr.san.value) {
+            if (!(chr.san.value > 30) && newSan > 30) {
+                env.snowman.node.className = "c-snowman";
+                env.cat.node.className = "c-cat";
+                chr.san.borderNode.className = "";
+                env.billboards.forEach(board => {
+                    board.pending = true;
+                });
+            }
+            if (!(chr.san.value > 20) && newSan > 20) {
+                env.contentNode.className = "";
+            }
+            chr.san.value = newSan;
+            chr.san.percentNode.style = "width: " + newSan + "%;";
+        }
+    }
+}
+function tickSan() {
+    ctl.t1++;
+    if (chr.action == "music" && ctl.t1 % 3 == 0) {
+        sanDecrease(1);
+    }
+}
 function tickTransfrom() {
+    var fullWidth = env.contentNode.clientWidth;
+    var halfWidth = 0.5 * fullWidth;
     if (chr.speed != 0) {
         if (chr.dir) {
             chr.px = Math.max(env.leftBound, chr.px - chr.speed);
@@ -395,6 +500,14 @@ function tickTransfrom() {
             chr.px = Math.min(env.mapWidth - env.rightBound, chr.px + chr.speed);
         }
         chr.change = true;
+        var vpx = Math.max(halfWidth, Math.min(chr.px, env.mapWidth - halfWidth));
+        var vvr = halfWidth + 90;
+        env.billboards.forEach(board => {
+            if (board.pending && Math.abs(vpx - board.px) > vvr) {
+                board.node.innerHTML = env.content.nextEntry();
+                board.pending = false;
+            }
+        });
     }
     if (chr.change) {
         chr.change = false;
@@ -407,8 +520,6 @@ function tickTransfrom() {
         if (chr.dir) {
             chrStyle = " scaleX(-1)" + chrStyle;
         }
-        var fullWidth = env.contentNode.clientWidth;
-        var halfWidth = 0.5 * fullWidth;
         if (chr.px < halfWidth) {
             gndStyle = "transform: translateX(0px)" + gndStyle;
             chrStyle = "transform: translateX(" + chr.px + "px)" + chrStyle;
@@ -422,6 +533,15 @@ function tickTransfrom() {
         env.groundNode.style = gndStyle;
         env.overlayNode.style = gndStyle;
         chr.node.style = chrStyle;
+        if (env.cat.node.className == "c-cat visible") {
+            if (chr.px < env.cat.px && chr.dir) {
+                env.cat.node.style = "transform: translateX(" + env.cat.px + "px); background-image: url(img/cat-left.png);";
+            } else if (chr.px > env.cat.px && !chr.dir) {
+                env.cat.node.style = "transform: translateX(" + env.cat.px + "px); background-image: url(img/cat-right.png);";
+            } else {
+                env.cat.node.style = "transform: translateX(" + env.cat.px + "px); background-image: url(img/cat-idle.png);";
+            }
+        }
     }
 }
 function tickCake() {
@@ -431,16 +551,7 @@ function tickCake() {
             env.cover.inSide = true;
             breakCover();
         }
-        if (chr.san.value != 100) {
-            if (!(chr.san.value > 30)) {
-                chr.san.borderNode.className = "";
-            }
-            if (!(chr.san.value > 20)) {
-                env.contentNode.className = "";
-            }
-            chr.san.value = 100;
-            chr.san.percentNode.style = "";
-        }
+        sanIncrease(100);
         if (env.cover.hp > 0) {
             env.cover.rnd1 = 0.7 * env.cover.rnd1 + 0.3 * (8 * Math.random() - 4);
             env.cover.rnd2 = 0.7 * env.cover.rnd2 + 0.3 * (6 * Math.random() - 3);
@@ -450,24 +561,14 @@ function tickCake() {
         env.cover.inSide = false;
     }
 }
-function tickEntities() {
+function tickMisc() {
     for (var i = 0; i < env.entities.length; i++) {
         var obj = env.entities[i];
         if (obj.ttl > 0) {
             obj.px += obj.vx;
             obj.node.style = "transform: translateX(" + obj.px + "px);";
             if (Math.abs(obj.px - chr.px) < 80 && chr.action != "gulugulu") {
-                var newSan = Math.min(100, chr.san.value + 10);
-                if (newSan != chr.san.value) {
-                    if (!(chr.san.value > 30) && newSan > 30) {
-                        chr.san.borderNode.className = "";
-                    }
-                    if (!(chr.san.value > 20) && newSan > 20) {
-                        env.contentNode.className = "";
-                    }
-                    chr.san.value = newSan;
-                    chr.san.percentNode.style = "width: " + newSan + "%;";
-                }
+                sanIncrease(10);
                 obj.ttl = 0;
             } else if (obj.px > env.mapWidth - env.rightBound) {
                 breakCover();
@@ -478,6 +579,33 @@ function tickEntities() {
             if (!obj.ttl > 0) {
                 env.groundNode.removeChild(obj.node);
             }
+        }
+    }
+    if (Math.abs(chr.px - env.chicken.px) < 200 && chr.action == "en" && env.chicken.ttl < 0) {
+        env.chicken.ttl = 60;
+    }
+    if (env.chicken.ttl >= 0) {
+        if (env.chicken.ttl >= 40) {
+            var p = Math.min(10, Math.abs(env.chicken.ttl - 50)) / 10;
+            env.chicken.node.style = "transform: translate(" + env.chicken.px + "px," + (80 * (p * p - 1)) + "px)";
+        } else {
+            env.chicken.node.style = "transform: translateX(" + env.chicken.px + "px) rotate(" + (30 * Math.sin(env.chicken.ttl / 20 * Math.PI)) + "deg);";
+        }
+        env.chicken.ttl--;
+    }
+    if (env.snowman.node.className == "c-snowman visible") {
+        var r = Math.abs(chr.px - env.snowman.px);
+        if (r < 200 && chr.action == "qbing") {
+            r = -1;
+            alpha = 0.85;
+        }
+        if (env.snowman.lr != r) {
+            env.snowman.lr = r;
+            var alpha = 0.85;
+            if (r >= 0) {
+                alpha = 0.65 * Math.sin(Math.min(r, 680) / 680 * Math.PI);
+            }
+            env.snowman.node.style = "transform: translateX(" + env.snowman.px + "px); opacity: " + alpha + ";";
         }
     }
 }
@@ -513,11 +641,10 @@ function tickMusic() {
     }
 }
 function tick() {
-    ctl.t1++;
     tickSan();
     tickTransfrom();
     tickCake();
-    tickEntities();
+    tickMisc();
     tickMusic();
 }
 function startGame() {

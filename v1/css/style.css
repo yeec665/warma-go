@@ -8,6 +8,8 @@ body {
     background-color: black;
     overflow: hidden;
     user-select: none;
+    -moz-touch-callout:none;
+    -webkit-touch-callout:none;
 }
 body>div {
     position: absolute;
@@ -43,10 +45,9 @@ body>div {
     position: absolute;
 }
 .billboard {
-    width: 166px;
-    height: 116px;
+    width: 172px;
+    height: 122px;
     top: 145px;
-    padding: 3px;
     border: 4px solid #444;
     display: flex;
     flex-direction: row;
@@ -66,6 +67,42 @@ body>div {
     background-image: url("../img/heart.png");
     background-position: center;
     background-repeat: no-repeat;
+}
+.c-chicken {
+    width: 96px;
+    height: 96px;
+    left: -48px;
+    top: 440px;
+    background-image: url("../img/chicken.png");
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.c-cat {
+    width: 320px;
+    height: 180px;
+    left: -160px;
+    top: 375px;
+    background-image: url("../img/cat-idle.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: 2s;
+    opacity: 0;
+}
+.c-cat.visible {
+    opacity: 1;
+}
+.c-snowman {
+    width: 320px;
+    height: 320px;
+    left: -160px;
+    top: 250px;
+    background-image: url("../img/snowman.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    display: none;
+}
+.c-snowman.visible {
+    display: block;
 }
 #character {
     bottom: 18px;
@@ -118,7 +155,7 @@ body>div {
     font-size: 16px;
     color: #FFF;
 }
-/**
+/**/
 #debug {
     display: none;
 }
