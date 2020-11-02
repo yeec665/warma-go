@@ -272,28 +272,15 @@ function seqChange() {
         setAction("pikapika");
         return;
     }
-    if (seq.endsWith("aA")) {
-        setDir(true);
+    if (seq.endsWith("aA") || seq.endsWith("fF")) {
+        setDir(seq.endsWith("A"));
         chr.speed = chr.speedLevels[4];
         setAction("gulugulu");
         chr.cream = 0;
         return;
     }
-    if (seq.endsWith("fF")) {
-        setDir(false);
-        chr.speed = chr.speedLevels[4];
-        setAction("gulugulu");
-        chr.cream = 0;
-        return;
-    }
-    if (seq.endsWith("sS")) {
-        setDir(true);
-        chr.speed = chr.speedLevels[2];
-        setAction("gadagudong");
-        return;
-    }
-    if (seq.endsWith("dD")) {
-        setDir(false);
+    if (seq.endsWith("sS") || seq.endsWith("dD")) {
+        setDir(seq.endsWith("S"));
         chr.speed = chr.speedLevels[2];
         setAction("gadagudong");
         return;
